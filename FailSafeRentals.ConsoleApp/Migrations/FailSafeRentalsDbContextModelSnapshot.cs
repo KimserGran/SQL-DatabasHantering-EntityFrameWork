@@ -16,7 +16,7 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261115112447_InitialCreate";
+    public override string LastMigrationId => "20261116092325_AddedFleetManagement";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -52,19 +52,59 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("DriverLicenseNumber")
                     .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    .HasMaxLength(50)
+                    .HasColumnType("nvarchar(50)");
 
                 b.Property<string>("Email")
                     .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    .HasMaxLength(200)
+                    .HasColumnType("nvarchar(200)");
 
                 b.Property<string>("FullName")
                     .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
 
                 b.HasKey("Id");
 
                 b.ToTable("Customers");
+            });
+
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.DamageReports", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasMaxLength(1000)
+                    .HasColumnType("nvarchar(1000)");
+
+                b.Property<decimal>("EstimatedCost")
+                    .HasColumnType("decimal(18,2)");
+
+                b.Property<int>("FleetVehicleId")
+                    .HasColumnType("int");
+
+                b.Property<DateTime?>("RepairedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<DateTime>("ReportedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Severity")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("nvarchar(20)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("FleetVehicleId");
+
+                b.ToTable("DamageReports");
             });
 
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.ExtraFeature", b =>
@@ -86,6 +126,40 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("Id");
 
                 b.ToTable("ExtraFeatures");
+            });
+
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.FleetVehicle", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<string>("MakeAndModel")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("nvarchar(100)");
+
+                b.Property<int>("MileageKm")
+                    .HasColumnType("int");
+
+                b.Property<bool>("NeedsService")
+                    .HasColumnType("bit");
+
+                b.Property<string>("RegistrationNumber")
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnType("nvarchar(10)");
+
+                b.Property<int>("RentalStationId")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.HasIndex("RentalStationId");
+
+                b.ToTable("FleetVehicle");
             });
 
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.Rental", b =>
@@ -123,6 +197,34 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("VehicleId");
 
                 b.ToTable("Rentals");
+            });
+
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.RentalStation", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(id);
+
+                b.Property<string>("City")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("nvarchar(50)");
+
+                b.Property<string>("StationCode")
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasColumnType("nvarchar(10)");
+
+                b.Property<string>("StreetAddress")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("nvarchar(200)");
+
+                b.HasKey("Id");
+
+                b.ToTable("RentalStation");
             });
 
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.Vehicle", b =>
@@ -178,6 +280,28 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
             });
 
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.DamageReports", b =>
+            {
+                b.HasOne("FailSafeRentals.ConsoleApp.Models.FleetVehicle", "FleetVehicle")
+                    .WithMany()
+                    .HasForeignKey("FleetVehicleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("FleetVehicle");
+            });
+
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.FleetVehicle", b =>
+            {
+                b.HasOne("FailSafeRentals.ConsoleApp.Models.RentalStation", "RentalStation")
+                    .WithMany("FleetVehicle")
+                    .HasForeignKey("RentalStationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("RentalStation");
+            });
+
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.Rental", b =>
             {
                 b.HasOne("FailSafeRentals.ConsoleApp.Models.Customer", "Customer")
@@ -200,6 +324,11 @@ partial class FailSafeRentalsDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.Customer", b =>
             {
                 b.Navigation("Rentals");
+            });
+
+        modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.RentalStation", b =>
+            {
+                b.Navigation("FleetVehicle");
             });
 
         modelBuilder.Entity("FailSafeRentals.ConsoleApp.Models.Vehicle", b =>

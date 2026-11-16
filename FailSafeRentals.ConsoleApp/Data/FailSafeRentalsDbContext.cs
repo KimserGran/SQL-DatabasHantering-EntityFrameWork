@@ -10,11 +10,17 @@ public class FailSafeRentalsDbContext : DbContext
     public DbSet<Vehicle> Vehicles { get; set; } = null!;
     public DbSet<Rental> Rentals { get; set; } = null!;
     public DbSet<ExtraFeature> ExtraFeatures { get; set; } = null!;
+    public DbSet<RentalStation> RentalStation { get; set; } = null!;
+    public DbSet<FleetVehicle> FleetVehicle { get; set; } = null!;
+    public DbSet<DamageReports> DamageReports { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(
             @"Server=(localdb)\MSSQLLocalDB;Database=FailSafeRentals;Trusted_Connection=True;TrustServerCertificate=True;");
+        //Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=FailSafeIT;Integrated Security=True;Connect
+        //Timeout=30;Encrypt=True;Trust Server Certificate=False;
+        //Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
